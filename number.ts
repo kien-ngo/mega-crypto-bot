@@ -1,4 +1,5 @@
 export const formatNumber = (num: number): string => {
+  if (!num) return "N/A";
   const million = 1000000;
   const billion = 1000000000;
 
