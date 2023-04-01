@@ -1,10 +1,15 @@
 import { NextApiRequest, NextApiResponse } from "next";
 const BOT_TOKEN = process.env.BOT_TOKEN!;
-const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`
+const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
+export const sendMessage = async (message: string, chatId: string) => {
+  const res = await fetch(
+    `${BASE_URL}/sendMessage?chat_id=${chatId}&text=${message}&parse_mode=HTML`
+  );
+};
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const {
     query: { token },
-    body: {message},
+    body: { message },
   } = req;
   if (token !== BOT_TOKEN) {
     return res.status(500).end("Invalid Auth");
@@ -14,17 +19,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       "Welcome to <i>NextJS News Channel</i> <b>" +
       req.body.message.from.first_name +
       "</b>.%0ATo get a list of commands sends /help";
-    const ret = await fetch(
-      `${BASE_URL}/sendMessage?chat_id=${message.chat.id}&text=${response}&parse_mode=HTML`
-    );
+    await sendMessage(response, message.chat.id);
   }
   if (req.body.message.text === "/help") {
     const response =
       "Help for <i>NextJS News Channel</i>.%0AUse /search <i>keyword</i> to search for <i>keyword</i> in my Medium publication";
-    const ret = await fetch(
-      `${BASE_URL}/sendMessage?chat_id=${message.chat.id}&text=${response}&parse_mode=HTML`
-    );
+    await sendMessage(response, message.chat.id);
   }
-  res.status(200).send("OK");
-  return new Response("Hello, Next.js!");
 };
