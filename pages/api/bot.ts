@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
+// `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${url}`
 type TBotRequest = {
   update_id: number;
   message: {
@@ -41,11 +41,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       "Welcome to <i>NextJS News Channel</i> <b>" +
       req.body.message.from.first_name +
       "</b>.%0ATo get a list of commands sends /help";
-    await sendMessage(response, String(message.chat.id));
+    sendMessage(response, String(message.chat.id));
   }
   if (req.body.message.text === "/help") {
     const response =
       "Help for <i>NextJS News Channel</i>.%0AUse /search <i>keyword</i> to search for <i>keyword</i> in my Medium publication";
-    await sendMessage(response, String(message.chat.id));
+    sendMessage(response, String(message.chat.id));
   }
+};
+
+export const config = {
+  runtime: "edge",
 };
