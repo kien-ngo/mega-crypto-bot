@@ -35,6 +35,7 @@ export const sendMessage = async (message: string, chatId: string) => {
 };
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const body: TBotRequest = req.body;
+  if (!body) return res.status(500).send("error");
   const message = body.message;
   if (req.body.message.text === "/start") {
     const response =
@@ -48,8 +49,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       "Help for <i>NextJS News Channel</i>.%0AUse /search <i>keyword</i> to search for <i>keyword</i> in my Medium publication";
     sendMessage(response, String(message.chat.id));
   }
-};
-
-export const config = {
-  runtime: "edge",
 };
