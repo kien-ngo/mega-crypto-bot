@@ -49,4 +49,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       "Help for <i>NextJS News Channel</i>.%0AUse /search <i>keyword</i> to search for <i>keyword</i> in my Medium publication";
     sendMessage(response, String(message.chat.id));
   }
+  res.status(200).send("ok");
 };
