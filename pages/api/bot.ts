@@ -1,4 +1,31 @@
 import { NextApiRequest, NextApiResponse } from "next";
+
+type TBotRequest = {
+  update_id: number;
+  message: {
+    message_id: number;
+    from: {
+      id: number;
+      is_bot: boolean;
+      first_name: string;
+      username: string;
+      language_code: string;
+    };
+    chat: {
+      id: number;
+      first_name: string;
+      username: string;
+      type: string; // private | public
+    };
+    date: number;
+    text: string;
+    entities: Array<{
+      offset: number;
+      length: number;
+      type: string;
+    }>;
+  };
+};
 const BOT_TOKEN = process.env.BOT_TOKEN!;
 const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 export const sendMessage = async (message: string, chatId: string) => {
@@ -7,23 +34,18 @@ export const sendMessage = async (message: string, chatId: string) => {
   );
 };
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const {
-    query: { token },
-    body: { message },
-  } = req;
-  if (token !== BOT_TOKEN) {
-    return res.status(500).end("Invalid Auth");
-  }
+  const body: TBotRequest = req.body;
+  const message = body.message;
   if (req.body.message.text === "/start") {
     const response =
       "Welcome to <i>NextJS News Channel</i> <b>" +
       req.body.message.from.first_name +
       "</b>.%0ATo get a list of commands sends /help";
-    await sendMessage(response, message.chat.id);
+    await sendMessage(response, String(message.chat.id));
   }
   if (req.body.message.text === "/help") {
     const response =
       "Help for <i>NextJS News Channel</i>.%0AUse /search <i>keyword</i> to search for <i>keyword</i> in my Medium publication";
-    await sendMessage(response, message.chat.id);
+    await sendMessage(response, String(message.chat.id));
   }
 };
