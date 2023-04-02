@@ -15,6 +15,7 @@ const Home: NextPage = () => {
             t.me/xava_coin_bot
           </a>
           <br />
+          Author: <a href="https://kienngo.me" target="_blank" className="underline">kienngo.me</a><br/><br/>
           Description: This bot utilizes the Congecko API and does a couple of
           things related to crypto such as:
           <br />
@@ -32,14 +33,14 @@ const Home: NextPage = () => {
             <div>
               All commands start with{" "}
               <b>
-                <i>"/k"</i>
+                <i>&quot;/k&quot;</i>
               </b>
             </div>
             <ul className="list-disc ml-4">
               <li className="border-b border-gray-400 pb-4">
                 <div className="flex flex-col">
                   <div>
-                    <b>[Desc]ription:</b> Get the bot&apos;s description
+                    <b>[D]escription:</b> Get the bot&apos;s description
                   </div>
                   <div>
                     Example:
@@ -76,7 +77,7 @@ const Home: NextPage = () => {
                     <br />
                     /k p btc
                     <br />
-                    /k p id=bitcoin ("bitcoin" is the Coingecko ID of BTC)
+                    /k p id=bitcoin (&quot;bitcoin&quot; is the Coingecko ID of BTC)
                   </div>
                 </div>
               </li>

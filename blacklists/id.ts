@@ -80,5 +80,5 @@ export const idBlacklist: string[] = [
   "lido-staked-polkadot",
   "wizard-token-8fc587d7-4b79-4f5a-89c9-475f528c6d47",
   "wmatic",
-  "celsiusx-wrapped-eth"
+  "celsiusx-wrapped-eth",
 ];

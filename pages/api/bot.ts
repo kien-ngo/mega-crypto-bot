@@ -43,7 +43,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
      * 2. /k [c]ompare <symbol1,symbol2>
      * 3.
      */
-    if (arr.length === 3) {
+    if (arr.length === 2) {
+      const command = arr[1];
+      if (["d", "description"].includes(command)) {
+        const msg =
+          "Welcome. This bot does some crypto related tasks such as fetching price and comparing stats between 2 coins.%0A";
+        await sendMessage(msg, chatId);
+      } else if (["h", "help"].includes(command)) {
+        const msg =
+          'CAll commands start is "/k ":%0ATo fetch the price of a coin:%0A"/k price btc"%0Aor%0A"/k p btc"%0ATo compare the start of coins (separated by a comma and no space):%0A/k compare btc,eth%0Aor%0A/k c btc,eth';
+        await sendMessage(msg, chatId);
+      }
+    } else if (arr.length === 3) {
       const command = arr[1];
       // Begin of price command
       if (["price", "p"].includes(command)) {
