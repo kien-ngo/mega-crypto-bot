@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { formatNumber } from "../../scripts/number";
 import { getPriceWithId, getPriceWithSymbol } from "../../scripts/coingecko";
+import { getTvlOfAllChains } from "../../scripts/defillama";
 
 const BOT_TOKEN = process.env.BOT_TOKEN!;
 const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
@@ -121,24 +122,37 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const r = await Promise.all([
           getPriceWithId(coinIds[0].i, coinIds[0].s),
           getPriceWithId(coinIds[1].i, coinIds[1].s),
+          getTvlOfAllChains(),
         ]);
-        if (r.some((item) => !item.valid || !item.result)) {
+        if ([r[0], r[1]].some((item) => !item.valid || !item.result)) {
           throw Error(`Oops, something went wrong when fetching price`);
         }
         const results = [r[0].result!, r[1].result!];
+        console.log(r[2]);
+        const tvls: string[] = [
+          formatNumber(
+            r[2].find((o) => o.gecko_id === results[0].gecko_id)?.tvl ?? 0
+          ) ?? "N/A",
+          formatNumber(
+            r[2].find((o) => o.gecko_id === results[1].gecko_id)?.tvl ?? 0
+          ) ?? "N/A",
+        ];
+        console.log({ tvls });
         const maxCol1 = Math.max(
           "|Price".length,
           "|24h".length,
           "|Vol".length,
-          "|Mcap".length
+          "|Mcap".length,
+          "|TVL".length
         );
-        const [maxCol2, maxCol3] = results.map((item) =>
+        const [maxCol2, maxCol3] = results.map((item, index) =>
           Math.max(
             `${item.symbol}`.length,
             `$${item.price_usd}`.length,
             `%${item.change}`.length,
             `$${formatNumber(item.vol)}`.length,
-            `$${formatNumber(item.mcap)}`.length
+            `$${formatNumber(item.mcap)}`.length,
+            `$${tvls[index]}`.length
           )
         );
         // Label
@@ -166,7 +180,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         // Marketcap
         const mcapRow = `${"|Mcap".padEnd(maxCol1)}| $${formatNumber(
           results[0].mcap
-        ).padEnd(maxCol2 - 1)}| $${formatNumber(results[1].mcap)}`;
+        ).padEnd(maxCol2 - 1)}| $${formatNumber(results[1].mcap)}%0A`;
+
+        // Total value locked
+        const tvlRow = `${"|TVL".padEnd(maxCol1)}| $${tvls[0].padEnd(
+          maxCol2 - 1
+        )}| $${tvls[1]}`;
 
         const labelSeparator = `|${"-".padEnd(maxCol1 - 1, "-")}|${"-".padEnd(
           maxCol2 + 1,
@@ -175,7 +194,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const header = `${results[0].symbol.toUpperCase()} vs ${results[1].symbol.toUpperCase()}${"".padEnd(
           labelSeparator.length
         )}%0A%0A`;
-        const msg = `${header}<pre>${labelRow}${labelSeparator}${priceRow}${changeRow}${volRow}${mcapRow}</pre>`;
+        const msg = `${header}<pre>${labelRow}${labelSeparator}${priceRow}${changeRow}${volRow}${mcapRow}${tvlRow}</pre>`;
         await sendMessage(msg, chatId);
       }
     } else {

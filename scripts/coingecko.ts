@@ -8,6 +8,7 @@ export type CoingeckoObject = {
     change: number;
     symbol: string;
     mcap: number;
+    gecko_id: string;
   };
 };
 export const getPriceWithId = async (
@@ -25,6 +26,7 @@ export const getPriceWithId = async (
     change: parseFloat((res[coinId].usd_24h_change as number).toFixed(2)),
     symbol: symbol ?? coinId.toUpperCase(),
     mcap: res[coinId].usd_market_cap,
+    gecko_id: coinId,
   };
   return { valid: true, result: result };
 };
