@@ -37,7 +37,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (!commandStr || !chatId) return res.send("ok");
     if (!commandStr.startsWith("/k ")) return res.send("ok");
     const arr: string[] = commandStr.split(" ");
-    if (arr.length < 3) throw Error("Command length must be > 3");
     /**
      * List of len===3 commands
      * 1. /k [p]rice <symbol> OR /k [p]rice id=<coingecko_id>
@@ -48,11 +47,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const command = arr[1];
       if (["d", "description"].includes(command)) {
         const msg =
-          "Welcome. This bot does some crypto related tasks such as fetching price and comparing stats between 2 coins.%0A";
+          "Welcome. This bot does some crypto related tasks such as fetching price and comparing stats between 2 coins.%0AGet started by typing:%0A/k help%0Aor%0A/k h";
         await sendMessage(msg, chatId);
       } else if (["h", "help"].includes(command)) {
         const msg =
-          'CAll commands start is "/k ":%0ATo fetch the price of a coin:%0A"/k price btc"%0Aor%0A"/k p btc"%0ATo compare the start of coins (separated by a comma and no space):%0A/k compare btc,eth%0Aor%0A/k c btc,eth';
+          'All commands start is "/k ":%0ATo fetch the price of a coin:%0A"/k price btc"%0Aor%0A"/k p btc"%0ATo compare the stats of 2 coins (separated by a comma and no space):%0A/k compare btc,eth%0Aor%0A/k c btc,eth';
         await sendMessage(msg, chatId);
       }
     } else if (arr.length === 3) {
@@ -128,7 +127,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           throw Error(`Oops, something went wrong when fetching price`);
         }
         const results = [r[0].result!, r[1].result!];
-        console.log(r[2]);
         const tvls: string[] = [
           formatNumber(
             r[2].find((o) => o.gecko_id === results[0].gecko_id)?.tvl ?? 0
@@ -137,7 +135,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             r[2].find((o) => o.gecko_id === results[1].gecko_id)?.tvl ?? 0
           ) ?? "N/A",
         ];
-        console.log({ tvls });
         const maxCol1 = Math.max(
           "|Price".length,
           "|24h".length,
