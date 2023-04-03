@@ -10,7 +10,11 @@ export const getTvlOfAllChains = async (): Promise<TChainTvl[]> => {
   const r: TChainTvl[] = await fetch("https://api.llama.fi/chains").then(
     (res) => res.json()
   );
-  return r;
+  const res = r.map((item) => {
+    item.tvl = parseFloat(item.tvl.toFixed(2));
+    return item;
+  });
+  return res;
 };
 
 // {
