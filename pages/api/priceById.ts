@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import { getPriceWithId, preparePriceMessage } from "../../scripts/coingecko";
 import { getCommandStrAndChatId } from "../../telegram";
 import { sendMessage } from "../../telegram/sendMessage";
@@ -8,8 +9,7 @@ export const config = {
 };
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const body = await new Response(req.body).json();
-  const { chatId, commandStr } = getCommandStrAndChatId(body);
+  const { chatId, commandStr } = getCommandStrAndChatId(req.body);
   const arr = commandStr!.split(" ").map((item) => item.trim());
   try {
     const coinId = arr[2].split("=")[1];

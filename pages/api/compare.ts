@@ -4,6 +4,7 @@ import { getTvlOfAllChains } from "../../scripts/defillama";
 import { formatNumber } from "../../scripts/number";
 import { getCommandStrAndChatId } from "../../telegram";
 import { sendMessage } from "../../telegram/sendMessage";
+import coinList from "../../raw_data.json";
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { chatId, commandStr } = getCommandStrAndChatId(req.body);
@@ -12,15 +13,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const symbols: string[] = arr[2].split(",").map((symbol) => symbol.trim());
     if (symbols.length > 2)
       throw Error("Error: You can only compare 2 coins at once");
-    // Check the symbols agains minified.json
-    const { default: data } = await import("../../raw_data.json", {
-      assert: {
-        type: "json",
-      },
-    });
     const coinIds = [];
     for (let i = 0; i < symbols.length; i++) {
-      const found = data.find((item) => item.s === symbols[i].toLowerCase());
+      const found = coinList.find(
+        (item) => item.s === symbols[i].toLowerCase()
+      );
       if (!found) {
         throw Error(
           `Error: symbol ${symbols[i].toUpperCase()} is not supported`
@@ -37,6 +34,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       throw Error(`Oops, something went wrong when fetching price`);
     }
     const results = [r[0].result!, r[1].result!];
+    console.log({ avax: r[0].result });
     const tvls: string[] = [
       formatNumber(
         r[2].find((o) => o.gecko_id === results[0].gecko_id)?.tvl ?? 0
@@ -76,7 +74,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const changeRow = `${"|24h".padEnd(maxCol1)}| ${
       results[0].change >= 0
         ? "+"
-        : "" + String(results[0].change + "%").padEnd(maxCol2)
+        : String(results[0].change + "%").padEnd(maxCol2)
     }| ${String(results[1].change)}%%0A`;
 
     // Vol
