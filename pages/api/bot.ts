@@ -121,7 +121,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             change >= 0 ? "+" : ""
           }${change}%%0AVol: $${formatNumber(vol)}%0AMcap: ${formatNumber(
             mcap
-          )}`;
+          )}%0A%0A  <a href="https://www.coingecko.com/en/coins/${
+            content.gecko_id
+          }">Coingecko</a>`;
           await sendMessage(htmlMsg, chatId);
         } else {
           await sendMessage("Oops, something went wrong", chatId);
