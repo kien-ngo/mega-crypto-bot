@@ -23,7 +23,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   let commandStr: string = "";
   if (body.callback_query) {
     commandStr = body.callback_query.data;
-    chatId = body.callback_query.from?.id;
+    chatId = body.callback_query.message?.chat?.id;
   } else if (body.message) {
     commandStr = body.message?.text;
     chatId = body.message.chat.id;

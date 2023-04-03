@@ -9,7 +9,7 @@ export const sendMessage = async (message: string, chatId: string) => {
   const rest = await fetch(
     `${BASE_URL}/sendMessage?chat_id=${chatId}&text=${message}&parse_mode=HTML`
   ).then((r) => r.json());
-  console.log({ rest });
+  console.log({ sendMessage: rest });
 };
 
 export type TCmdString = `/k ${string}`;
@@ -23,9 +23,6 @@ export const sendMessageWithOptions = async (
   chatId: string,
   options: TKeyboardOption[]
 ) => {
-  console.log([
-    options.map((item) => [{ text: item.label, callback_data: item.value }]),
-  ]);
   // Create the reply markup object with the options stacked up vertically
   const inline_keyboard: Array<
     Array<{ text: string; callback_data: TCmdString }>
@@ -52,5 +49,5 @@ export const sendMessageWithOptions = async (
     .then((response) => response.json())
     .then((data) => console.log(data))
     .catch((error) => console.error(error));
-  console.log({ res });
+  console.log({ sendMessageWithOptions: res });
 };
