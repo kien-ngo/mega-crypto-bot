@@ -18,7 +18,7 @@ import {
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const body = req.body;
-  console.log(util.inspect(body, false, null, true /* enable colors */));
+  // console.log(util.inspect(body, false, null, true /* enable colors */));
   let chatId: string = "";
   let commandStr: string = "";
   if (body.callback_query) {
@@ -82,8 +82,15 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             },
           });
           const records = data.filter(
-            (item) => item.s.toLowerCase() === _symbol.toLowerCase()
+            (item) =>
+              item.s.toLowerCase() === _symbol.toLowerCase() ||
+              item.i.toLowerCase() === _symbol.toLowerCase()
           );
+          if (!records.length) {
+            throw Error(
+              `Error: symbol ${_symbol.toUpperCase()} is not supported`
+            );
+          }
           // If there's only one then proceed to fetch price
           if (records.length === 1) {
             const result = await getPriceWithId(records[0].i);
