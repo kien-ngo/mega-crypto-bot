@@ -47,7 +47,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const command = arr[1];
       if (["d", "description"].includes(command)) {
         const msg =
-          "Welcome. This bot does some crypto related tasks such as fetching price and comparing stats between 2 coins.%0AGet started by typing:%0A/k help%0Aor%0A/k h";
+          'Welcome. This bot does some crypto related tasks such as fetching price and comparing stats between 2 coins.%0AGet started by typing:%0A/k help%0Aor%0A/k h%0A%0ALink: <a href="http://github.com/kienngo98/mega-crypto-bot">Github</a>%0ALink: <a href="http://kienngo.me">Author</a>';
         await sendMessage(msg, chatId);
       } else if (["h", "help"].includes(command)) {
         const msg =
