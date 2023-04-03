@@ -3,39 +3,39 @@ import { NextRequest, NextResponse } from "next/server";
 import { formatNumber } from "../../scripts/number";
 import { getPriceWithId, getPriceWithSymbol } from "../../scripts/coingecko";
 import { getTvlOfAllChains } from "../../scripts/defillama";
+const util = require("util");
+import {
+  sendMessage,
+  sendMessageWithOptions,
+  TKeyboardOption,
+} from "../../scripts/sendMessage";
 
-const BOT_TOKEN = process.env.BOT_TOKEN!;
-const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
-const setWebhook = async (url: string) => {
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${url}`
-  ).then((r) => r.json());
-};
-
-export const sendMessage = async (message: string, chatId: string) => {
-  const rest = await fetch(
-    `${BASE_URL}/sendMessage?chat_id=${chatId}&text=${message}&parse_mode=HTML`
-  ).then((r) => r.json());
-  console.log({ rest });
-};
+// const setWebhook = async (url: string) => {
+//   const res = await fetch(
+//     `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${url}`
+//   ).then((r) => r.json());
+// };
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const body = req.body;
-  const chatId = body.message?.chat?.id
-    ? body.message.chat.id
-    : body.channel_post?.chat?.id
-    ? body.channel_post.chat.id
-    : "";
-  const commandStr = body.message?.text
-    ? body.message.text
-    : body.channel_post?.text
-    ? body.channel_post.text
-    : "";
+  console.log(util.inspect(body, false, null, true /* enable colors */));
+  let chatId: string = "";
+  let commandStr: string = "";
+  if (body.callback_query) {
+    commandStr = body.callback_query.data;
+    chatId = body.callback_query.from?.id;
+  } else if (body.message) {
+    commandStr = body.message?.text;
+    chatId = body.message.chat.id;
+  } else if (body.channel_post) {
+    commandStr = body.channel_post.text;
+    chatId = body.channel_post.chat.id;
+  }
+  if (!commandStr || !chatId) return res.send("ok");
+  if (!commandStr.startsWith("/k ")) return res.send("ok");
+
   // EXECUTE
   try {
-    if (!commandStr || !chatId) return res.send("ok");
-    if (!commandStr.startsWith("/k ")) return res.send("ok");
     const arr: string[] = commandStr.split(" ");
     /**
      * List of len===3 commands
@@ -53,6 +53,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const msg =
           'All commands start is "/k ":%0ATo fetch the price of a coin:%0A"/k price btc"%0Aor%0A"/k p btc"%0ATo compare the stats of 2 coins (separated by a comma and no space):%0A/k compare btc,eth%0Aor%0A/k c btc,eth';
         await sendMessage(msg, chatId);
+      } else {
+        throw Error("Invalid command");
       }
     } else if (arr.length === 3) {
       const command = arr[1];
@@ -71,22 +73,46 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             content = result.result!;
           }
         } else {
+          // Symbols are not unique. We need to search for all the records with the same symbols from minified.json
+          // and then prompt back to users which option they wanna go with
           const _symbol = arr[2];
-          const result = await getPriceWithSymbol(_symbol);
-          if (!result.valid || !result.result) {
-            await sendMessage(
-              result.message ?? "Oops, something went wrong",
-              chatId
-            );
+          const { default: data } = await import("../../raw_data.json", {
+            assert: {
+              type: "json",
+            },
+          });
+          const records = data.filter(
+            (item) => item.s.toLowerCase() === _symbol.toLowerCase()
+          );
+          // If there's only one then proceed to fetch price
+          if (records.length === 1) {
+            const result = await getPriceWithId(records[0].i);
+            if (!result.valid || !result.result) {
+              await sendMessage(
+                result.message ?? "Oops, something went wrong",
+                chatId
+              );
+            } else {
+              content = result.result!;
+            }
           } else {
-            content = result.result!;
+            const options: TKeyboardOption[] = records.map((item) => ({
+              label: item.n,
+              value: `/k p id=${item.i}`,
+            }));
+            await sendMessageWithOptions(
+              `Which $${_symbol.toUpperCase()}?`,
+              chatId,
+              options
+            );
+            return res.status(200).send("ok");
           }
         }
         if (content) {
           const { price_usd, vol, change, symbol, mcap } = content;
           const htmlMsg = `<b>${symbol.toUpperCase()}</b>:%0APrice: $${price_usd}%0A24h: ${
             change >= 0 ? "+" : ""
-          }${change}%%0AVol: $${formatNumber(vol)}%0AMcap:${formatNumber(
+          }${change}%%0AVol: $${formatNumber(vol)}%0AMcap: ${formatNumber(
             mcap
           )}`;
           await sendMessage(htmlMsg, chatId);
@@ -101,7 +127,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         if (symbols.length > 2)
           throw Error("Error: You can only compare 2 coins at once");
         // Check the symbols agains minified.json
-        const { default: data } = await import("../../minified.json", {
+        const { default: data } = await import("../../raw_data.json", {
           assert: {
             type: "json",
           },

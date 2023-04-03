@@ -1,5 +1,6 @@
 export const formatNumber = (num: number): string => {
   if (!num) return "N/A";
+  const thousand = 100_000;
   const million = 1_000_000;
   const billion = 1_000_000_000;
   const trillion = 1_000_000_000_000;
@@ -12,6 +13,9 @@ export const formatNumber = (num: number): string => {
   } else if (num >= million) {
     const numM = (num / million).toFixed(1);
     return `${numM}M`;
+  } else if (num >= thousand) {
+    const numM = (num / thousand).toFixed(1);
+    return `${numM}K`;
   } else {
     return num.toString();
   }

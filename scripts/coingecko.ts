@@ -36,7 +36,11 @@ export const getPriceWithSymbol = async (
 ): Promise<CoingeckoObject> => {
   try {
     if (!symbol) return { valid: false };
-    const data: { i: string; s: string }[] = require("../minified.json");
+    const { default: data } = await import("../raw_data.json", {
+      assert: {
+        type: "json",
+      },
+    });
     const searchRes = data.find((item) => item.s === symbol);
     if (!searchRes) return { valid: false, message: "Invalid ticker" };
     const coinId = searchRes.i;
