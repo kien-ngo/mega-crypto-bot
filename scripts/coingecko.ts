@@ -1,3 +1,5 @@
+import { formatNumber } from "./number";
+
 const BASE_URL = "https://api.coingecko.com/api/v3";
 export type CoingeckoObject = {
   valid: boolean;
@@ -31,37 +33,14 @@ export const getPriceWithId = async (
   return { valid: true, result: result };
 };
 
-export const getPriceWithSymbol = async (
-  symbol: string
-): Promise<CoingeckoObject> => {
-  try {
-    if (!symbol) return { valid: false };
-    const { default: data } = await import("../raw_data.json", {
-      assert: {
-        type: "json",
-      },
-    });
-    const searchRes = data.find((item) => item.s === symbol);
-    if (!searchRes) return { valid: false, message: "Invalid ticker" };
-    const coinId = searchRes.i;
-    const result = await getPriceWithId(coinId, searchRes.s);
-    return result;
-  } catch (err) {
-    console.error("Error in coingecko");
-    return { valid: false };
-  }
+export const preparePriceMessage = (
+  content: CoingeckoObject["result"]
+): string => {
+  const { price_usd, vol, change, symbol, mcap, gecko_id } = content!;
+  const htmlMsg = `<b>${symbol.toUpperCase()}</b>:%0APrice: $${price_usd}%0A24h: ${
+    change >= 0 ? "+" : ""
+  }${change}%%0AVol: $${formatNumber(vol)}%0AMcap: ${formatNumber(
+    mcap
+  )}%0A%0ACoinId: <i>${gecko_id}</i>%0A%0ASource: <a href="https://www.coingecko.com/en/coins/${gecko_id}">Coingecko</a>`;
+  return htmlMsg;
 };
-// Test data
-//   {
-//     "avalanche-2": {
-//       "usd": 17.667,
-//       "usd_24h_vol": 138131233.25548232,
-//       "usd_24h_change": -0.4179592306764687,
-//       "btc": 0.001,
-//       "btc_24h_vol": 4860.470880322105,
-//       "btc_24h_change": -0.11595644089366386,
-//       "eth": 0.01,
-//       "eth_24h_vol": 76009.61036956107,
-//       "eth_24h_change": 0.4604088025951702
-//     }
-//   }

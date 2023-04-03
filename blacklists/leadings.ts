@@ -1,4 +1,4 @@
-export const leadingBlackList: string[] = [
+export const leadingIdBlackList: string[] = [
   "zombie-",
   "aave-",
   "counpound-",
@@ -25,5 +25,5 @@ export const leadingBlackList: string[] = [
   "gravity-bridge",
   "oec-",
   "huobi-",
-  "RealT",
+  "binance-peg-",
 ];

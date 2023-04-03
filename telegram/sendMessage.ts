@@ -5,9 +5,15 @@ const BOT_TOKEN =
 
 const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
-export const sendMessage = async (message: string, chatId: string) => {
+export const sendMessage = async (
+  message: string,
+  chatId: string,
+  disableLinkThumbnail: boolean = true
+) => {
   const rest = await fetch(
-    `${BASE_URL}/sendMessage?chat_id=${chatId}&text=${message}&parse_mode=HTML`
+    `${BASE_URL}/sendMessage?chat_id=${chatId}&text=${message}&parse_mode=HTML&disable_web_page_preview=${
+      disableLinkThumbnail ? "True" : "False"
+    }`
   ).then((r) => r.json());
   console.log({ sendMessage: rest });
 };
@@ -42,6 +48,7 @@ export const sendMessageWithOptions = async (
         text: message,
         reply_markup: {
           inline_keyboard: inline_keyboard,
+          one_time_keyboard: true,
         },
       }),
     }
