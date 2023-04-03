@@ -1,12 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { NextRequest, NextResponse } from "next/server";
 import { getPriceWithId, preparePriceMessage } from "../../scripts/coingecko";
 import { getCommandStrAndChatId } from "../../telegram";
 import { sendMessage } from "../../telegram/sendMessage";
-
-export const config = {
-  runtime: "edge",
-};
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { chatId, commandStr } = getCommandStrAndChatId(req.body);
@@ -21,5 +16,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (err) {
     sendMessage(err as string, chatId!);
   }
-  return res.status(200).send("ok");
+  return res.send("ok");
 };

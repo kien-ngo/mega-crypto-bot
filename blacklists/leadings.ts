@@ -26,4 +26,9 @@ export const leadingIdBlackList: string[] = [
   "oec-",
   "huobi-",
   "binance-peg-",
+  'stafi-staked-',
+  'stader-',
+  'sing-token-',
+  'ripae-',
+  
 ];
